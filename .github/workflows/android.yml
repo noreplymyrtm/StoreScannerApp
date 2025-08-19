@@ -27,12 +27,14 @@ jobs:
         libncurses5-dev libncursesw5-dev libsqlite3-dev libreadline-dev libffi-dev \
         libssl-dev libbz2-dev openjdk-11-jdk unzip wget
 
-    # 4️⃣ Install Android SDK Build-Tools and Platform (fixed folder issue)
+    # 4️⃣ Install Android SDK Build-Tools (fixed folder structure)
     - name: Install Android SDK Build-Tools
       run: |
         mkdir -p $HOME/android-sdk/cmdline-tools/latest
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools/latest
+        unzip cmdline-tools.zip -d temp
+        mv temp/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
+        rm -rf temp cmdline-tools.zip
         yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
         $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
