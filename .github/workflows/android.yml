@@ -9,75 +9,71 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout repository
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # 1️⃣ Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # 2️⃣ Set up Python 3.10
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      # 2️⃣ Set up Python 3.10
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    # 3️⃣ Install system dependencies
-    - name: Install system packages
-      run: |
-        sudo apt update
-        sudo apt install -y python3-pip python3-dev git build-essential zlib1g-dev \
-        libncurses5-dev libncursesw5-dev libsqlite3-dev libreadline-dev libffi-dev \
-        libssl-dev libbz2-dev openjdk-11-jdk unzip wget
+      # 3️⃣ Install system dependencies
+      - name: Install system packages
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip python3-dev git build-essential unzip wget openjdk-11-jdk
 
-    # 4️⃣ Install Android SDK + Build-Tools 30.0.3 + accept licenses
-    - name: Install Android SDK Build-Tools
-      run: |
-        mkdir -p $HOME/android-sdk/cmdline-tools/latest
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d temp
-        mv temp/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
-        rm -rf temp cmdline-tools.zip
+      # 4️⃣ Install Android SDK Build-Tools 30.0.3 and accept licenses
+      - name: Install Android SDK
+        run: |
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d temp
+          mv temp/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
+          rm -rf temp cmdline-tools.zip
 
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
 
-        # Accept existing licenses
-        yes | sdkmanager --licenses || true
+          yes | sdkmanager --licenses
+          yes | sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
 
-        # Install platform-tools, SDK platform 30, and Build-Tools 30.0.3 non-interactively
-        yes | sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" || true
+      # 5️⃣ Fix Aidl for Buildozer
+      - name: Ensure aidl exists
+        run: |
+          mkdir -p $HOME/android-sdk/build-tools/30.0.3
+          if [ -f $HOME/android-sdk/cmdline-tools/latest/bin/aidl ]; then
+            cp $HOME/android-sdk/cmdline-tools/latest/bin/aidl $HOME/android-sdk/build-tools/30.0.3/
+          fi
 
-    # 5️⃣ Ensure aidl exists in build-tools folder
-    - name: Fix Aidl for Buildozer
-      run: |
-        mkdir -p $HOME/android-sdk/build-tools/30.0.3
-        if [ -f $HOME/android-sdk/cmdline-tools/latest/bin/aidl ]; then
-          cp $HOME/android-sdk/cmdline-tools/latest/bin/aidl $HOME/android-sdk/build-tools/30.0.3/
-        fi
+      # 6️⃣ Set Android environment variables
+      - name: Set environment variables
+        run: |
+          echo "ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
 
-    # 6️⃣ Set Android environment variables
-    - name: Set Android environment variables
-      run: |
-        echo "export ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "export PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
+      # 7️⃣ Install Buildozer and Cython
+      - name: Install Buildozer
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade buildozer cython
 
-    # 7️⃣ Install Buildozer and Cython
-    - name: Install Buildozer
-      run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install --upgrade buildozer cython
+      # 8️⃣ Ensure buildozer.spec exists
+      - name: Init buildozer.spec if missing
+        run: |
+          if [ ! -f buildozer.spec ]; then
+            buildozer init
+          fi
 
-    # 8️⃣ Ensure buildozer.spec exists
-    - name: Check or Init buildozer.spec
-      run: |
-        if [ ! -f buildozer.spec ]; then
-          buildozer init
+      # 9️⃣ Build APK
+      - name: Build APK
+        run: buildozer -v android debug
 
-    # 9️⃣ Build APK
-    - name: Build APK
-      run: buildozer -v android debug
-
-    # 🔟 Upload APK artifact
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: StoreScannerApp-APK
-        path: bin/*.apk
+      # 🔟 Upload APK artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: StoreScannerApp-APK
+          path: bin/*.apk
