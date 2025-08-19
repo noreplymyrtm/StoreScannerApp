@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout code
+    # 1️⃣ Checkout repository
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -45,30 +45,38 @@ jobs:
         # Install platform-tools, SDK platform, and stable Build-Tools
         sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
 
-    # 5️⃣ Set Android environment variables
+    # 5️⃣ Fix: ensure aidl exists in build-tools folder
+    - name: Fix Aidl for Buildozer
+      run: |
+        mkdir -p $HOME/android-sdk/build-tools/30.0.3
+        if [ -f $HOME/android-sdk/cmdline-tools/latest/bin/aidl ]; then
+          cp $HOME/android-sdk/cmdline-tools/latest/bin/aidl $HOME/android-sdk/build-tools/30.0.3/
+        fi
+
+    # 6️⃣ Set Android environment variables
     - name: Set Android environment variables
       run: |
         echo "export ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
         echo "export PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
 
-    # 6️⃣ Install Buildozer and Cython
+    # 7️⃣ Install Buildozer and Cython
     - name: Install Buildozer
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install --upgrade buildozer cython
 
-    # 7️⃣ Ensure buildozer.spec exists
+    # 8️⃣ Ensure buildozer.spec exists
     - name: Check or Init buildozer.spec
       run: |
         if [ ! -f buildozer.spec ]; then
           buildozer init
         fi
 
-    # 8️⃣ Build APK with verbose logging
+    # 9️⃣ Build APK with verbose logging
     - name: Build APK
       run: buildozer -v android debug
 
-    # 9️⃣ Upload APK artifact
+    # 🔟 Upload APK artifact
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
