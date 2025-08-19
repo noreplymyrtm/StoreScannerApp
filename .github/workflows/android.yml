@@ -39,13 +39,13 @@ jobs:
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
 
-        # Accept licenses non-interactively
+        # Accept existing licenses (if any)
         yes | sdkmanager --licenses || true
 
-        # Install platform-tools, SDK platform, and stable Build-Tools
-        sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+        # Install platform-tools, SDK platform, and Build-Tools with automatic Y
+        yes | sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3" || true
 
-    # 5️⃣ Fix: ensure aidl exists in build-tools folder
+    # 5️⃣ Copy aidl to expected Build-Tools folder (if missing)
     - name: Fix Aidl for Buildozer
       run: |
         mkdir -p $HOME/android-sdk/build-tools/30.0.3
@@ -70,7 +70,6 @@ jobs:
       run: |
         if [ ! -f buildozer.spec ]; then
           buildozer init
-        fi
 
     # 9️⃣ Build APK with verbose logging
     - name: Build APK
