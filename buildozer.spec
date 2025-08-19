@@ -13,7 +13,7 @@ orientation = portrait
 android.permissions = CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 
 # Android SDK/NDK versions
-android.api = 31
+android.api = 30
 android.minapi = 21
 android.ndk = 25b
 android.ndk_api = 21
