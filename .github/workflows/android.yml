@@ -1,0 +1,47 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip python3-dev git build-essential zlib1g-dev \
+        libncurses5-dev libncursesw5-dev libsqlite3-dev libreadline-dev libffi-dev \
+        libssl-dev libbz2-dev openjdk-11-jdk unzip
+
+    - name: Install Buildozer
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install --upgrade buildozer cython
+
+    - name: Initialize Buildozer
+      run: |
+        if [ ! -f buildozer.spec ]; then
+          buildozer init
+        fi
+
+    - name: Configure buildozer.spec
+      run: |
+        sed -i 's/package.name = myapp/package.name = StoreScannerApp/' buildozer.spec
+        sed -i 's/package.domain = org.test/package.domain = com.example/' buildozer.spec
+        sed -i 's/requirements = python3/requirements = python3,kivy,plyer/' buildozer.spec
+        sed -i 's/#android.permissions = INTERNET/android.permissions = CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE/' buildozer.spec
+
+    - name: Build APK
+      run: buildozer android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: StoreScannerApp-APK
+        path: bin/*.apk
