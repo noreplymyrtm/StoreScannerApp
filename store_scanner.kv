@@ -1,0 +1,39 @@
+<ScannerUI>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+
+    Label:
+        text: "Enter Store Code:"
+    TextInput:
+        id: store_code
+        multiline: False
+        hint_text: "E.g., ABC123"
+
+    Button:
+        text: "Scan Barcode"
+        on_press: root.start_scan()
+
+    TextInput:
+        id: barcode_input
+        multiline: False
+        hint_text: "Manual barcode input if scan fails"
+
+    Label:
+        text: "Select / Enter Date:"
+    TextInput:
+        id: date_input
+        multiline: False
+        hint_text: "YYYY-MM-DD"
+
+    Button:
+        text: "Add Scan"
+        on_press: root.add_scan()
+
+    Button:
+        text: "Save CSV"
+        on_press: root.save_csv()
+
+    Button:
+        text: "Share CSV"
+        on_press: root.share_csv()
