@@ -2,7 +2,7 @@
 title = StoreScannerApp
 package.name = storescanner
 package.domain = org.example
-source.dir = .        # <- this tells Buildozer to use current folder
+source.dir = .
 source.include_exts = py,png,jpg,kv
 version = 0.1
 orientation = portrait
