@@ -3,10 +3,12 @@ title = StoreScannerApp
 package.name = StoreScannerApp
 package.domain = com.example
 
+source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 
 requirements = python3,kivy,plyer
 
+version = 1.0
 orientation = portrait
 android.permissions = CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 
