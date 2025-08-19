@@ -51,6 +51,7 @@ jobs:
         mkdir -p $HOME/android-sdk/build-tools/30.0.3
         if [ -f $HOME/android-sdk/cmdline-tools/latest/bin/aidl ]; then
           cp $HOME/android-sdk/cmdline-tools/latest/bin/aidl $HOME/android-sdk/build-tools/30.0.3/
+        fi
 
     # 6️⃣ Set Android environment variables
     - name: Set Android environment variables
