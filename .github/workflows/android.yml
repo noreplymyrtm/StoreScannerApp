@@ -9,11 +9,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout repository
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # 2️⃣ Install system dependencies
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
     - name: Install dependencies
       run: |
         sudo apt update
@@ -21,24 +24,20 @@ jobs:
         libncurses5-dev libncursesw5-dev libsqlite3-dev libreadline-dev libffi-dev \
         libssl-dev libbz2-dev openjdk-11-jdk unzip
 
-    # 3️⃣ Install Buildozer and Cython
-    - name: Install Buildozer
+    - name: Install Buildozer and Cython
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install --upgrade buildozer cython
 
-    # 4️⃣ Ensure buildozer.spec exists
     - name: Check or Init buildozer.spec
       run: |
         if [ ! -f buildozer.spec ]; then
           buildozer init
         fi
 
-    # 5️⃣ Build APK with verbose logging
     - name: Build APK
       run: buildozer -v android debug
 
-    # 6️⃣ Upload APK artifact using latest version
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
