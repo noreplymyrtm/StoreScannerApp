@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout repository
+    # 1️⃣ Checkout code
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -27,7 +27,7 @@ jobs:
         libncurses5-dev libncursesw5-dev libsqlite3-dev libreadline-dev libffi-dev \
         libssl-dev libbz2-dev openjdk-11-jdk unzip wget
 
-    # 4️⃣ Install Android SDK Build-Tools (fixed for Aidl)
+    # 4️⃣ Install Android SDK + Build-Tools + accept licenses
     - name: Install Android SDK Build-Tools
       run: |
         mkdir -p $HOME/android-sdk/cmdline-tools/latest
@@ -36,17 +36,14 @@ jobs:
         mv temp/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
         rm -rf temp cmdline-tools.zip
 
-        # Accept licenses
-        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
 
-        # Install stable build-tools and platform known to work with Buildozer
-        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+        # Accept licenses non-interactively
+        yes | sdkmanager --licenses || true
 
-        # Ensure aidl exists in build-tools folder
-        if [ ! -f $HOME/android-sdk/build-tools/30.0.3/aidl ]; then
-          mkdir -p $HOME/android-sdk/build-tools/30.0.3
-          cp $HOME/android-sdk/cmdline-tools/latest/bin/aidl $HOME/android-sdk/build-tools/30.0.3/ || true
-        fi
+        # Install platform-tools, SDK platform, and stable Build-Tools
+        sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
 
     # 5️⃣ Set Android environment variables
     - name: Set Android environment variables
