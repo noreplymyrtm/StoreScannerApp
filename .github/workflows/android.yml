@@ -39,11 +39,9 @@ jobs:
       - name: Ensure aidl exists
         run: |
           mkdir -p $HOME/android-sdk/build-tools/30.0.3
-          if [ -f $HOME/android-sdk/cmdline-tools/latest/bin/aidl ]; then
-            cp $HOME/android-sdk/cmdline-tools/latest/bin/aidl $HOME/android-sdk/build-tools/30.0.3/
-          fi
+          cp $HOME/android-sdk/cmdline-tools/latest/bin/aidl $HOME/android-sdk/build-tools/30.0.3/
 
-      - name: Set environment variables
+      - name: Set Android environment
         run: |
           echo "ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
           echo "PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
